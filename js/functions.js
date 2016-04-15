@@ -305,11 +305,11 @@ function loadPayment () {
 
 	var paymentForm  = '<form class="col-lg-3 col-md-3">'+
 						 '<div class="form-group">'+
-						  '  <label for="exampleInputEmail1">Recipient</label>'+
-						  '  <input type="email" class="form-control" id="recipient" placeholder="Recipient">'+
+						  '  <label for="recipient">Recipient</label>'+
+						  '  <input type="text" class="form-control" id="recipient" placeholder="Recipient">'+
 						  '</div>'+
 						  '<div class="form-group">'+
-						  ' <label for="exampleInputPassword1">Amount</label>'+
+						  ' <label for="sendamount">Amount</label>'+
 						  '  <input type="number" class="form-control" id="sendamount" placeholder="Amount" min="0">'+
 						  '</div>'+
 						  '<p>Fee 1 Waves</p>'+
