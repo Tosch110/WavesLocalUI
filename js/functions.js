@@ -99,8 +99,6 @@ function loadBalance () {
 
 					balance = balance + balanceResult.balance;
 
-					console.log(balance);
-
 					$("#balancespan").html(balance +' Waves');
 
 				});
@@ -469,7 +467,11 @@ function loadPayment () {
 					};
 
 
-					$.post(server+'/payment', { paymentData }, function(response) {
+					$.post(server+'/payment', paymentData, function(response) {
+
+
+
+						console.log(response);
 
 						if(response.error) {
 							$("#payment_response").html(response.message);
@@ -524,6 +526,10 @@ function loadDebug () {
 		debugPage += '</table>';
 
 		debugPage += '<h2>Info</h2>';
+
+		debugPage += '<table class="table table-striped">';
+		debugPage += '<thead><tr><th>Key</th><th>Value</th></tr></thead>';
+		debugPage += '<tbody>';
 
 		$.getJSON(server+'/debug/info', function (response_info) {
 
