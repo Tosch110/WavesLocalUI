@@ -462,8 +462,14 @@ function loadPayment () {
 
 				if(recipient > '') {
 
+					var paymentData = {
+						"amount": amount,
+						"fee": 1,
+						"recipient": recipient
+					};
 
-					$.post(server+'/payment', { "amount": amount, "fee": "1", "recipient": recipient }, function(response) {
+
+					$.post(server+'/payment', { paymentData }, function(response) {
 
 						if(response.error) {
 							$("#payment_response").html(response.message);
