@@ -30,11 +30,13 @@
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li class="active wavesNavbar"><a href="#" id="blockchainpage">Blockchain</a></li>
+          <li class="active wavesNavbar"><a href="#" id="accountPage">Account</a></li>
+          <li class=" wavesNavbar"><a href="#" id="blockchainpage">Blockchain</a></li>
           <li class="wavesNavbar"><a href="#" id="walletpage">Wallet</a></li>
           <li class="wavesNavbar"><a href="#" id="consensuspage">Consensus</a></li>
           <li class="wavesNavbar"><a href="#" id="paymentpage">Payment</a></li>
           <li class="wavesNavbar"><a href="#" id="peerspage">Peers</a></li>
+          <li class="wavesNavbar"><a href="#" id="balancepage">Balance <span id="balancespan"></span></a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li class="wavesNavbar"><a href="#" id="debugpage">Debug</a></li>
@@ -44,6 +46,7 @@
   </nav>
 
 	<div class="container">
+    <div class="row"><div class="col-md-12"><span class="right" id="blockheight"></span></div></div>
 		<div id="app">
 			<!-- this is where the root component will get rendered -->
 		</div>

@@ -2,10 +2,37 @@
 
 var server = 'http://127.0.0.1:6869';
 
+var balance = 0;
+
+
+function loadBlockheight() {
+
+
+	$.getJSON(server+'/blocks/height', function(result) {
+
+		$("#blockheight").html('Block Height: '+result.height);
+
+	});
+
+}
+
 
 $(document).ready(function() {
 
-	initApp();
+	loadBlockheight();
+	loadBalance();
+
+	setInterval(loadBlockheight(), 10000);
+
+	loadAccount();
+
+	
+
+	$("#accountPage").on("click", function() {
+
+		loadAccount();
+
+	});
 	
 	$("#peerspage").on("click", function() {
 
@@ -14,7 +41,7 @@ $(document).ready(function() {
 	});
 
 	$("#blockchainpage").on("click", function() {
-		initApp();
+		loadBlock();
 	});
 
 
@@ -53,9 +80,109 @@ $(document).ready(function() {
 
 	});
 
-
+	
 
 });
+
+function loadBalance () {
+
+
+	$.getJSON(server+'/addresses/', function(response) {
+
+		balance = 0;
+
+		$.each(response, function(key, value) {
+
+			$.each(value, function(innerkey, innervalue) {
+
+				$.getJSON(server+'/addresses/balance/'+innervalue, function(balanceResult) {
+
+					balance = balance + balanceResult.balance;
+
+					console.log(balance);
+
+					$("#balancespan").html(balance +' Waves');
+
+				});
+
+			});
+
+		});
+	});
+
+
+}
+
+
+
+function loadAccount() {
+
+
+	var appContainer;
+	var welcomeJumbo = '<h2>Your Balance</h2>';
+
+	appContainer = welcomeJumbo;
+
+	
+
+	appContainer = '<div class="row"><div class="col-md-12"><h2>Balance: '+balance+' Waves</div></div>';
+
+	$.getJSON(server+'/addresses/', function(response) {
+
+		appContainer += '<div class="container"><h2>Your Wallet</h2>';
+
+		appContainer += '<table class="table table-striped">';
+		appContainer += '<thead><tr><th>Key</th><th>Value</th></tr></thead>';
+		appContainer += '<tbody>';
+
+		$.each(response, function(key, value) {
+
+			$.each(value, function(innerkey, innervalue) {
+
+				appContainer += '<tr><td>';
+				appContainer += innerkey;
+				appContainer += '</td><td>';
+				appContainer += innervalue;
+				appContainer += '</td></tr>';
+
+			});
+
+			
+
+		});
+
+		appContainer += '<tbody>';
+
+
+
+
+		appContainer += '</div>';
+
+		appContainer += '<button class="btn btn-primary" id="newAddress">New Address</button>';
+
+		
+		$("#app").html(appContainer);
+
+		$("#newAddress").on("click", function() {
+
+			$.post(server+'/addresses/', function(createAddress) {
+
+				$(".wavesNavbar").removeClass('active');
+
+				$("#walletpage").addClass('active');
+
+				loadWallet();
+
+			});
+
+		});
+
+
+	});
+
+
+
+}
 
 function loadWallet() {
 
@@ -185,7 +312,7 @@ function createTransactionTable (valueValue) {
 
 }
 
-function initApp() {
+function loadBlock() {
 
 
 	var appContainer;
@@ -220,7 +347,7 @@ function initApp() {
 		$("#app").html(appContainer);
 		
 		$("#updateBlock").on("click", function() {
-			initApp();
+			loadBlock();
 		});
 
 
@@ -267,7 +394,7 @@ function loadConsensus() {
 		appContainer += '<thead><tr><th>Key</th><th>Value</th></tr></thead>';
 		appContainer += '<tbody>';
 
-		$.getJSON(server+'/consensus/target', function (response_target) {
+		$.getJSON(server+'/consensus/basetarget', function (response_target) {
 
 
 			$.each(response_target, function(key, value) {
@@ -314,7 +441,6 @@ function loadPayment () {
 						  '</div>'+
 						  '<p>Fee 1 Waves</p>'+
 						  '<hr>'+
-						  '<p>+1 Fee</p>'+
 						  '<button type="submit" class="btn btn-default" id="sendpayment">Submit</button>'+
 						'</form>'+
 						'<div class="alert alert-primary" id="payment_response"></div>';
