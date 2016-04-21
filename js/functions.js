@@ -19,12 +19,14 @@ function loadBlockheight() {
 
 $(document).ready(function() {
 
+
+	loadAccount();
+
 	loadBlockheight();
 	loadBalance();
 
 	setInterval(loadBlockheight(), 10000);
 
-	loadAccount();
 
 	
 
@@ -72,6 +74,12 @@ $(document).ready(function() {
 		
 	});
 
+	$("#balancepage").on("click", function() {
+
+		loadHistory();
+
+	});
+
 	$(".wavesNavbar").on("click", function() {
 
 		$(".wavesNavbar").removeClass('active');
@@ -82,7 +90,11 @@ $(document).ready(function() {
 
 	
 
+	
+
 });
+
+
 
 function loadBalance () {
 
@@ -101,12 +113,109 @@ function loadBalance () {
 
 					$("#balancespan").html(balance +' Waves');
 
+					$('.balancewaves').html(balance + ' Waves');
+
 				});
 
 			});
 
 		});
 	});
+
+
+}
+
+function loadHistory() {
+
+	var signatures = [];
+
+	var appContainer = '';
+
+	appContainer += '<h2>Transaction History</h2>';
+
+	appContainer += '<table class="table">';
+
+	appContainer += '<thead>';
+	appContainer += '<tr>';
+	appContainer += '<th>Date</th>';
+	appContainer += '<th>Type</th>';
+	appContainer += '<th>Sender</th>';
+	appContainer += '<th>Recipient</th>';
+	appContainer += '<th>Fee</th>';
+	appContainer += '<th>Amount</th>';
+	appContainer += '</tr>';
+	appContainer += '</thead>';
+	appContainer += '<tbody>';
+
+	$.getJSON(server+'/addresses/', function(response) {
+
+		balance = 0;
+
+		$.each(response, function(key, value) {
+
+			$.each(value, function(innerkey, innervalue) {
+
+				$.getJSON(server+'/transactions/address/'+innervalue, function(transactionHistory) {
+
+					
+
+					$.each(transactionHistory[0], function(historyKey, historyValue) {
+
+						
+
+						if(historyValue.timestamp > 0) {
+
+							if(signatures.indexOf(historyValue.signature) < 0) {
+
+								signatures.push(historyValue.signature);
+
+								appContainer += '<tr>';
+								appContainer += '<td>'+historyValue.timestamp+'</td>';
+								appContainer += '<td>'+historyValue.type+'</td>';
+								appContainer += '<td>'+historyValue.sender+'</td>';
+								appContainer += '<td>'+historyValue.recipient+'</td>';
+								appContainer += '<td>'+historyValue.fee+'</td>';
+								appContainer += '<td>'+historyValue.amount+'</td>';
+
+								appContainer += '</tr>';
+
+							}
+							
+							
+							
+						}
+
+
+					});
+
+					
+
+				});
+
+			});
+
+
+		});
+
+		
+	});
+
+
+	
+
+	setTimeout(function() {
+
+		console.log(appContainer);
+		appContainer += '</tbody>';
+		appContainer += '</table>';
+
+		$("#app").html(appContainer);
+
+	}, 1000);
+
+
+
+
 
 
 }
@@ -119,11 +228,9 @@ function loadAccount() {
 	var appContainer;
 	var welcomeJumbo = '<h2>Your Balance</h2>';
 
-	appContainer = welcomeJumbo;
+	appContainer = welcomeJumbo;	
 
-	
-
-	appContainer = '<div class="row"><div class="col-md-12"><h2>Balance: '+balance+' Waves</div></div>';
+	appContainer = '<div class="row"><div class="col-md-12"><h2>Balance: <span class="balancewaves"></span></div></div>';
 
 	$.getJSON(server+'/addresses/', function(response) {
 
@@ -160,6 +267,7 @@ function loadAccount() {
 
 		
 		$("#app").html(appContainer);
+		$('.balancewaves').html(balance + ' Waves');
 
 		$("#newAddress").on("click", function() {
 
@@ -214,9 +322,6 @@ function loadWallet() {
 		});
 
 		appContainer += '<tbody>';
-
-
-
 
 		appContainer += '</div>';
 
@@ -428,7 +533,14 @@ function loadConsensus() {
 
 function loadPayment () {
 
-	var paymentForm  = '<form class="col-lg-3 col-md-3">'+
+
+	var paymentForm = '<div class="row"><div class="col-md-6">'+
+						
+						'<form id="paymentForm">'+
+						'<div class="form-group">'+
+						  '  <label for="sender">Sender (choose from Your Accounts)</label>'+
+						  '  <input type="text" class="form-control" id="sender" placeholder="Sender">'+
+						  '</div>'+
 						 '<div class="form-group">'+
 						  '  <label for="recipient">Recipient</label>'+
 						  '  <input type="text" class="form-control" id="recipient" placeholder="Recipient">'+
@@ -439,19 +551,50 @@ function loadPayment () {
 						  '</div>'+
 						  '<p>Fee 1 Waves</p>'+
 						  '<hr>'+
-						  '<button type="submit" class="btn btn-default" id="sendpayment">Submit</button>'+
+						  '<button class="btn btn-default" id="sendpayment">Submit</button>'+
 						'</form>'+
 						'<div class="alert alert-primary" id="payment_response"></div>';
 
 
+		paymentForm += '</div><div class="col-md-6"><h2>Your accounts</h2>';
+
+		paymentForm += '<div id="accounts_sender"></div>';
+		paymentForm += '</div>';
 
 
-	$("#app").html(paymentForm);
+		$("#app").html(paymentForm);
 
-	$("#sendpayment").on("click", function() {
+
+		$.getJSON(server+'/addresses/', function(response) {
+
+			balance = 0;
+
+			$.each(response, function(key, value) {
+
+				$.each(value, function(innerkey, innervalue) {
+
+					$.getJSON(server+'/addresses/balance/'+innervalue, function(balanceResult) {
+
+						$("#accounts_sender").append(innervalue +' - Balance: '+balanceResult.balance+'<br>');
+
+					});
+
+				});
+
+			});
+		});
+
+
+		
+
+
+	$("#sendpayment").on("click", function(e) {
+
+		e.preventDefault();
 
 		var amount = $("#sendamount").val();
 		var recipient = $("#recipient").val();
+		var sender = $("#sender").val();
 
 		$("#sendpayment").on("click", function() {
 
@@ -460,30 +603,24 @@ function loadPayment () {
 
 				if(recipient > '') {
 
-					var paymentData = {
-						"amount": amount,
-						"fee": 1,
-						"recipient": recipient
-					};
-
-
-					$.post(server+'/payment', paymentData, function(response) {
-
-
-
-						console.log(response);
-
-						if(response.error) {
-							$("#payment_response").html(response.message);
-						} else {
-
-							console.log(response);
-
-							$("#payment_response").html(response.toString());
-
-						}
-
+					$.ajax({
+						url: server+'/payment',
+					    data: JSON.stringify({
+							"amount": amount,
+							"fee": 1,
+							"sender": sender,
+							"recipient": recipient
+						}),
+					    type: "POST",
+					    success: function(successrequest){
+					        console.log(successrequest);
+					    },
+					    error: function(response){
+					        $("#payment_response").html(response.message);
+					    }
 					});
+
+					
 
 				} else {
 					alert ('Please insert a recipient');
