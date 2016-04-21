@@ -267,7 +267,7 @@ function loadAccount() {
 
 		
 		$("#app").html(appContainer);
-		$('.balancewaves').html(balance + ' Waves');
+		$('.balancewaves').html($("#balancespan").html());
 
 		$("#newAddress").on("click", function() {
 
